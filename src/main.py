@@ -1,14 +1,17 @@
 from typing import List, Literal
 from uuid import UUID
 
-from fastapi import FastAPI
+from fastapi import FastAPI,Request
 
 from lib.todo_manager import TodoManager
 from lib.models import Todo, TodoWithChildren
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
 manager = TodoManager()
 
+templates = Jinja2Templates(directory="templates")
 
 @app.get("/todo")
 async def list_all_todos() -> List[Todo]:
@@ -34,3 +37,7 @@ async def add_todo(
 @app.delete("/todo/{todo_uuid}")
 async def remove_todo(todo_uuid: str) -> bool:
     return manager.remove_todo(todo_uuid)
+
+@app.get("/",response_class=HTMLResponse)
+async def home(request:Request):
+    return templates.TemplateResponse("index.html",{"request":request})
